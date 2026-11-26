@@ -8,7 +8,7 @@ export function workspace(root, role, page) {
   const refresh = async () => {
     try {
       const rows = await request(page.path);
-      panel.replaceChildren(el('h2',{},page.caption),dataView(rows, page.columns,page.view));
+      panel.replaceChildren(el('h2',{},page.caption),dataView(rows, page.columns,page.view,page));
     } catch (error) { panel.replaceChildren(status(error.message,'error')); }
   };
   const actions = page.actions.filter(x => x.roles.includes(role));

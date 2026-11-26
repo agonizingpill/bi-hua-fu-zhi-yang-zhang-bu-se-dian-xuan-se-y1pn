@@ -10,10 +10,19 @@ from domain.shade_studies_schemas import FitAtPoint, ConfirmColor
 
 router = APIRouter()
 
+
 @router.get('/shade_studies')
 def list_shade_studies(user=Depends(actor)):
     with transaction() as conn:
-        return scan(conn, shade_studies)
+        rows = [service.enrich_study(row) for row in scan(conn, shade_studies)]
+        return service.annotate_studies_withdrawals(conn, rows)
+
+
+@router.get('/shade_studies/workbench')
+def shade_studies_workbench(user=Depends(actor)):
+    with transaction() as conn:
+        rows = [service.enrich_study(row) for row in scan(conn, shade_studies)]
+        return service.annotate_studies_withdrawals(conn, rows)
 
 
 @router.post('/shade_studies/fit-at-point')

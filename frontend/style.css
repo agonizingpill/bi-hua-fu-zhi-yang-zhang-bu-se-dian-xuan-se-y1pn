@@ -75,3 +75,22 @@ label span { display:block; color:var(--soft); font-size:.875em }
 .proof-map svg .keepout{fill:var(--ink);opacity:.65}
 .proof-map svg .registered{fill:var(--accent);stroke:var(--sheet);stroke-width:.8}
 .proof-map small{color:var(--soft)}
+
+.badge{display:inline-block;padding:.12rem .55rem;border-radius:999px;font-size:.82em;font-weight:700;white-space:nowrap;border:1px solid currentColor}
+.badge.stale{color:oklch(45% .17 28);background:oklch(93% .03 30)}
+.badge.ok{color:oklch(42% .11 150);background:oklch(94% .03 150)}
+.badge.wait{color:var(--soft);background:var(--tint)}
+td.cell-badge{white-space:nowrap}
+tr.row-stale{background:oklch(95% .025 30)}
+.record.pending-retest{border-inline-start-color:oklch(45% .17 28)}
+.predictions{margin-top:clamp(1.2rem,2.5vw,2rem)}
+.predictions-head{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.predictions-head h2{margin:0}
+.predictions-head .refresh{padding:.3rem .9rem}
+.predictions-body{margin-top:.8rem}
+.snapshot{margin-top:.7rem;border-top:1px dashed var(--line);padding-top:.5rem}
+.snapshot summary{cursor:pointer;color:var(--accent);font-weight:650}
+.snapshot-scroll{max-height:16rem;overflow:auto;margin-top:.5rem}
+.snapshot-table{font-size:.86em}
+.snapshot-note{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;color:oklch(45% .17 28);margin:.4rem 0 0}
+.row-flags{margin-top:.3rem}

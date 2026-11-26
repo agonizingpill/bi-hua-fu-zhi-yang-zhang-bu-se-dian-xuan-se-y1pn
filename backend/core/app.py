@@ -8,14 +8,15 @@ from core import auth
 from core.db import metadata, transaction
 from core.config import SEED_DEMO
 from core.middleware import install
-from core.queueing import broker, view
+from core.migrate import ensure_columns
+from core.queueing import broker, view, list_jobs
 from domain.routes import routers
 from scripts.seed_demo import seed
 
 @asynccontextmanager
 async def lifespan(app):
     from core.db import engine
-    metadata.create_all(engine)
+    ensure_columns(engine)
     if SEED_DEMO:
         try:
             seed()
@@ -34,6 +35,11 @@ def health():
     with transaction() as conn:
         conn.execute(text('SELECT 1'))
     return {'ok': bool(broker.ping())}
+
+@app.get('/compute')
+def compute_list(user=Depends(auth.actor)):
+    with transaction() as conn:
+        return list_jobs(user, conn=conn)
 
 @app.get('/compute/{token}')
 def compute(token: str, user=Depends(auth.actor)):

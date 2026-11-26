@@ -33,7 +33,10 @@ def calculate(data):
     interval = 1.96*float(std[selected])
     alternatives = [{'fraction':round(float(fractions[index]),5),'mean':round(float(means[index]),5),
         'upper': round(float(means[index]+1.96*std[index]),5)} for index in np.argsort(scores)[:4]]
+    refs = lambda group: sorted({str(r['sample_ref']) for r in group if r.get('sample_ref')})
     return {'fraction':round(float(fractions[selected]),5),'mean_de':round(mean,5),
         'lower_de':round(max(0.,mean-interval),5),'upper_de':round(mean+interval,5),
         'test_mae':round(mae,6),'train':len(training),'holdout':len(holdout),
+        'used_refs':refs(rows),'train_refs':refs(training),'holdout_refs':refs(holdout),
+        'used_codes':sorted({r['code'] for r in rows if r.get('code')}),
         'candidates':alternatives}

@@ -52,9 +52,18 @@ Compose 运行 Nginx、Python FastAPI、独立 Redis 消费进程、SQL 数据�
 | 业务任务 | FastAPI 路由 | 页面 |
 |---|---|---|
 | 复制样张边界 | `/proof_regions` /proof_regions/revise-mask | `frontend/src/pages/proof_regions.js` |
-| 干样点测色样 | `/dry_swatches` /dry_swatches/record-swatch，/dry_swatches/witness-swatch | `frontend/src/pages/dry_swatches.js` |
-| 色差区间签认 | `/shade_studies` /shade_studies/fit-at-point，/shade_studies/confirm-color | `frontend/src/pages/shade_studies.js` |
+| 干样点测色样 | `/dry_swatches` /dry_swatches/record-swatch，/dry_swatches/witness-swatch，/dry_swatches/withdraw-ref，/dry_swatches/retest-swatch，/dry_swatches/withdrawals | `frontend/src/pages/dry_swatches.js` |
+| 色差区间签认 | `/shade_studies` /shade_studies/fit-at-point，/shade_studies/confirm-color，/shade_studies/workbench；预测工作台 `/compute`、`/compute/{token}/validity`、`/predictions`、`/workbench` | `frontend/src/pages/shade_studies.js` |
 | 试色位及试色回执 | `/patch_slots` /patch_slots/reserve-patch，/patch_slots/consume-patch | `frontend/src/pages/patch_slots.js` |
+
+### 凭证撤回与待补测
+
+干样 ΔE76 抄错时，复核员在“干样点测色样”页用 `/dry_swatches/withdraw-ref`（别名 `/dry_swatches/revoke-ref`、`/dry_swatches/withdraw-voucher` 等，可用 `sample_ref`/`ref`/`voucher` 或干样 `chip`/`code` 定位）撤回点测凭证。撤回在 `ref_withdrawals` 登记并把该干样置为 `已撤回`、退出拟合样本集。
+
+- 排队中到待签的拟合预测，只要排队快照 `input.studies` 中任一干样（训练折或每五个等序留一的留出折）用过该凭证，`GET /compute/{token}` 与 `GET /compute` 即标 `invalid`/`retest_required`/`marker="待补测"`、`state_label="待补测"`；`confirm-color` 在签认事务内对干样行加锁复核，撤回先登记提交时返回 409 挡住旧预测。未用过该凭证的预测照常签认。
+- 补测可用 `/dry_swatches/retest-swatch` 录入新 ΔE76 并按需一步验真（或再走 witness-swatch），也可登记新干样/新凭证后验真，再 `fit-at-point` 重算。旧预测不会复活（撤回时的旧读数与登记簿长期留痕），只有新读数快照的新预测可签认。
+- 签认时把当次用过的干样读数、凭证与区间固化进 `shade_studies.readings`/`used_refs`/`evidence`（及 `used_readings`、`source_readings`、`snapshot` 等别名），凭证事后撤回仍可在色差签认工作台展开快照查到原值。`/workbench` 聚合签认簿、干样与待补测预测。
+- 启动时 `core/migrate.py` 会幂等补齐旧数据卷缺失的新列。
 
 SQL 实体与约束在 `backend/domain` 下维护。前端使用原生 ES modules。核心算子为 GaussianProcessRegressor。两输入为色料比例与归一后的底色 L*，Matérn 3/2 核和白噪声核，固定参数和种子 1089。每五个干样按比例等顺序留一，报告验证 MAE，再用全样本搜索 41 格并以均值+0.8σ排序。区间为模型正态预测区间，负下界截到 0。
 
